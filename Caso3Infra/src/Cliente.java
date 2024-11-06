@@ -49,7 +49,6 @@ public class Cliente {
         } finally {
             scanner.close();
         }
-        
         System.out.println("Todos los clientes han terminado");
     }
     

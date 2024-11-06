@@ -21,6 +21,9 @@ public class Servidor {
         ServerSocket servSock = null;
         Boolean continuar = true;
         try {
+            System.out.println("Iniciando servidor iterativo");
+            System.out.println("Listo para recibir conexiones");
+            
             servSock = new ServerSocket(PUERTO);
         } catch(Exception e) {
             System.err.println("Ocurrio un error");
@@ -50,6 +53,7 @@ public class Servidor {
         ServerSocket servSock = null;
         try {
             servSock = new ServerSocket(PUERTO);
+            System.out.println("Iniciando servidor con delegados");
             System.out.println("Listo para recibir conexiones");
             
             while(true) {
