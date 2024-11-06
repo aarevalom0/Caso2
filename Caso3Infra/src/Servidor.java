@@ -5,12 +5,17 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.Buffer;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Servidor {
     private static final int PUERTO = 3400;
+  
+                                    
+
+
 
     public static void servidorIterativo() throws Exception{
         ServerSocket servSock = null;
@@ -64,9 +69,10 @@ public class Servidor {
     }
 
     public static void main(String args[]) throws Exception {
-            Scanner scanner = new Scanner(System.in);
-        boolean running = true;
 
+        Scanner scanner = new Scanner(System.in);
+        boolean running = true;
+        Datos.UpdateData();
         while (running) {
             System.out.println("\nMenú del servidor:");
             System.out.println("1. Generar llaves asimétricas");

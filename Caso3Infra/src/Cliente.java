@@ -19,7 +19,7 @@ public class Cliente {
                 Socket socket = new Socket(SERVIDOR, PUERTO);
                 PrintWriter escritor = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader lector = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                ProtocoloCliente.procesar(lector, escritor);
+                ProtocoloCliente.procesar(lector, escritor, i%32,i%6);
                 
             } catch (IOException e) {
                 e.printStackTrace();

@@ -19,7 +19,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.crypto.Cipher;
+import javax.crypto.Mac;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class Seguridad {
@@ -144,5 +146,47 @@ public class Seguridad {
         return llaves;
     }
 
+    public static byte[] cifrarSimetrico(Key llave, String texto,byte[] iv) {
+        byte[] textoCifrado;
+        try {
+            Cipher cifrador = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            IvParameterSpec ivaux = new IvParameterSpec(iv);
+            byte[] textoClaro = texto.getBytes();
+            cifrador.init(Cipher.ENCRYPT_MODE, llave, ivaux);
+            textoCifrado = cifrador.doFinal(textoClaro);
+            return textoCifrado;
+        } catch (Exception e) {
+            System.out.println("Excepcion: " + e.getMessage());
+            return null;
+        }
+        }
+    
+        public static byte[] descifrarSimetrico(Key llave, byte[] texto,byte[] iv) {
+            byte[] textoClaro;
+            try {
+                Cipher cifrador = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                IvParameterSpec ivaux = new IvParameterSpec(iv);
+                cifrador.init(Cipher.DECRYPT_MODE, llave, ivaux);
+                textoClaro = cifrador.doFinal(texto);
+                return textoClaro;
+            } catch (Exception e) {
+                System.out.println("Excepcion: " + e.getMessage());
+                return null;
+            }
+        }
+
+        public static byte[] HMAC(Key llave, byte[] texto) {
+            byte[] Hmac;
+            try {
+                Mac mac = Mac.getInstance("HmacSHA384");
+                mac.init(llave);
+                Hmac = mac.doFinal(texto);
+                return Hmac;
+            } catch (Exception e) {
+                System.out.println("Excepcion: " + e.getMessage());
+                return null;
+            }
+        }
+    
 
 }

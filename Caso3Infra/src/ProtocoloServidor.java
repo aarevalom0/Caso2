@@ -64,16 +64,48 @@ public class ProtocoloServidor {
                     ArrayList<Key> llaves = Seguridad.LlavesSimetricas(Secreto);
                     Key K_AB1 = llaves.get(0);
                     Key K_AB2 = llaves.get(1);
-                    
+
+                    byte[] IdCifrado = Base64.getDecoder().decode(pIn.readLine());
+                    byte[] HmacRecibido = Base64.getDecoder().decode(pIn.readLine());
+                    String Id = new String(Seguridad.descifrarSimetrico(K_AB1, IdCifrado,iv));
+                    byte[] Hmac = Seguridad.HMAC(K_AB2, IdCifrado);
+
+                    byte[] IDPaqC = Base64.getDecoder().decode(pIn.readLine());
+                    byte[] HMACPaq = Base64.getDecoder().decode(pIn.readLine());
+                    String Idp = new String(Seguridad.descifrarSimetrico(K_AB1, IDPaqC,iv));
+                    byte[] HmacPaq = Seguridad.HMAC(K_AB2, IDPaqC);
+
+                    if (Base64.getEncoder().encodeToString(HmacRecibido).equals(Base64.getEncoder().encodeToString(Hmac))) {
+                        if (Base64.getEncoder().encodeToString(HMACPaq).equals(Base64.getEncoder().encodeToString(HmacPaq))) {
+
+                            Integer estado = Datos.ConsultarUsuario(Integer.parseInt(Id), Integer.parseInt(Idp));
+                            String Estadocifrado = Base64.getEncoder().encodeToString(Seguridad.cifrarSimetrico(K_AB1, estado.toString(), iv));
+                            pOut.println(Estadocifrado);
+                            byte[] HMACEstado = Seguridad.HMAC(K_AB2, Base64.getDecoder().decode(Estadocifrado));
+                            pOut.println(Base64.getEncoder().encodeToString(HMACEstado));
+
+                        }  else {
+                    pOut.println("ERROR");
+                    System.out.println("Error en la consulta");
+                }                       
+                    } else {
+                        pOut.println("ERROR");
+                        System.out.println("Error en la consulta");
+                    } 
                 } else {
                     pOut.println("ERROR");
+                    System.out.println("Error en la consulta");
                 }
                 
 
 
             } else {
                 pOut.println("ERROR");
+                System.out.println("Error en la consulta");
             }
+        } else {
+            pOut.println("ERROR");
+            System.out.println("Error en la consulta");
         } 
 
        

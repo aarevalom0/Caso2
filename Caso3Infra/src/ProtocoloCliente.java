@@ -16,7 +16,7 @@ public class ProtocoloCliente {
     private OutputStream outputStream;
 
   
-    public static void procesar(BufferedReader pIn, PrintWriter pOut) throws Exception {
+    public static void procesar(BufferedReader pIn, PrintWriter pOut, Integer id, Integer IdP) throws Exception {
         SecureRandom random = new SecureRandom();
         String inputLine, outputLine;
         Key publicaservidor =  Seguridad.LlavePublicaServidor();
@@ -47,19 +47,43 @@ public class ProtocoloCliente {
                 ArrayList<Key> llaves = Seguridad.LlavesSimetricas(Secreto);
                 Key K_AB1 = llaves.get(0);
                 Key K_AB2 = llaves.get(1);
-                
-                
+                String IdCifrado = Base64.getEncoder().encodeToString(Seguridad.cifrarSimetrico(K_AB1, id.toString(), iv));
+                pOut.println(IdCifrado);
+                byte[] Hmac = Seguridad.HMAC(K_AB2, Base64.getDecoder().decode(IdCifrado));
+                pOut.println(Base64.getEncoder().encodeToString(Hmac));
 
-                } 
-            else {
-            pOut.println("ERROR");
-                        }
+                String IdPaq = Base64.getEncoder().encodeToString(Seguridad.cifrarSimetrico(K_AB1, IdP.toString(), iv));
+                pOut.println(IdPaq);
+                byte[] HmacPaq = Seguridad.HMAC(K_AB2, Base64.getDecoder().decode(IdPaq));
+                pOut.println(Base64.getEncoder().encodeToString(HmacPaq));
+
+                //System.out.println("ID: " + id + " IDP: " + IdP);
+
+                byte[] Estado = Base64.getDecoder().decode(pIn.readLine());
+                byte[] HMACEstado = Base64.getDecoder().decode(pIn.readLine());
+                String EstadoDescifrado = new String(Seguridad.descifrarSimetrico(K_AB1, Estado,iv));
+                byte[] HMACCalculado = Seguridad.HMAC(K_AB2, Estado);
+
+                if(Base64.getEncoder().encodeToString(HMACCalculado).equals(Base64.getEncoder().encodeToString(HMACEstado))) {
+                        String respuesta = Datos.ConsultaEstado(Integer.parseInt(EstadoDescifrado));
+                        System.out.println("El paquete del usuario " + id + " con Identificador de paquete " + IdP + " tiene estado: " + respuesta);
+                        pOut.println("TERMINAR");
+                    }else {
+                        pOut.println("ERROR");
+                        System.out.println("Error en la consulta");
+                    }         
+                }else {
+                    pOut.println("ERROR");
+                    System.out.println("Error en la consulta");
                 }
-        else {
-            pOut.println("ERROR");
-                        }
+        
 
+        }else {
+            pOut.println("ERROR");
+            System.out.println("Error en la consulta");
         }
+}
+
 }
         
         
