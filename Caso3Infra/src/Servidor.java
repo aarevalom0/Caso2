@@ -54,7 +54,7 @@ public class Servidor {
             
             while(true) {
                 Socket cliente = servSock.accept();
-                pool.execute((Runnable) new ProtocoloServidor(cliente));
+                pool.execute( new ThreadServidor(cliente,0));
             }
         } catch(Exception e) {
             System.err.println("Ocurrio un error");
