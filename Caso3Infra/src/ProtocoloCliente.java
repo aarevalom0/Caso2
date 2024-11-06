@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.security.Key;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Base64;
 
 import javax.crypto.SecretKey;
@@ -38,10 +39,16 @@ public class ProtocoloCliente {
             byte[] F = Base64.getDecoder().decode(pIn.readLine());
             if(Seguridad.VerificaFirma((P.toString(16) + G.toString(16) + Gx.toString(16)).getBytes(),F)) {
                 pOut.println("OK");
-                BigInteger Gy = Seguridad.GenerarPrimo( P, G);
+                BigInteger Y = Seguridad.GenerarPrimo( P, G);
+                BigInteger Gy = G.modPow(Y, P);
                 pOut.println(Gy.toString(16));
+                BigInteger Secreto = Gx.modPow(Y, P);
                 byte[] iv = Base64.getDecoder().decode(pIn.readLine());
-                System.out.println("IV: " + Base64.getEncoder().encodeToString(iv));
+                ArrayList<Key> llaves = Seguridad.LlavesSimetricas(Secreto);
+                Key K_AB1 = llaves.get(0);
+                Key K_AB2 = llaves.get(1);
+                
+                
 
                 } 
             else {

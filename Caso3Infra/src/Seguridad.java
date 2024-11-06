@@ -15,9 +15,12 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 public class Seguridad {
 
@@ -55,19 +58,11 @@ public class Seguridad {
         }
     }
 
-    public static String Digest(String algorithm, byte[] buffer) {
+    public static byte[]  Digest(byte[] buffer) {
     try {
-        MessageDigest digest = MessageDigest.getInstance(algorithm);
-        digest.update(buffer);
-        byte[] resultado = digest.digest();
-        String out = "";
-        for (int i = 0; i < resultado.length; i++) {
-            if ((resultado[i] & 0xff) <= 0xf) {
-                out += "0";
-            }
-            out += Integer.toHexString(resultado[i] & 0xff).toLowerCase();
-        }
-        return out;
+        MessageDigest digest = MessageDigest.getInstance("SHA-512");
+        digest.update(buffer);        
+        return digest.digest();
     } catch (Exception e) {
         System.out.println("Error al calcular el digest: " + e.getMessage());
         return null;
@@ -128,9 +123,7 @@ public class Seguridad {
         while(x.compareTo(p) >= 0){
             x = new BigInteger(1024, random);
         }
-
-        BigInteger Gx = g.modPow(x, p);
-        return Gx;
+        return x;
     }
 
     public static byte[] GenerarIV() {
@@ -139,7 +132,17 @@ public class Seguridad {
         return iv;
     }
 
-
+    public static ArrayList<Key> LlavesSimetricas(BigInteger secreto) {
+        ArrayList<Key> llaves = new ArrayList<Key>();
+        byte[] digest = Digest(secreto.toByteArray());
+        byte[] AB1 = Arrays.copyOfRange(digest, 0, digest.length/2);   
+        byte[] AB2 = Arrays.copyOfRange(digest, digest.length/2, digest.length);
+        Key K_AB1 = new SecretKeySpec(AB1, "AES");
+        llaves.add(K_AB1);
+        Key K_AB2 = new SecretKeySpec(AB2, "AES");
+        llaves.add(K_AB2);
+        return llaves;
+    }
 
 
 }

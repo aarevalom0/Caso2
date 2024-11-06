@@ -11,7 +11,7 @@ public class Cliente {
 
     public static void main(String[] args) throws Exception {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("\nDigite cantidad de clientes:");
+        System.out.println("Digite cantidad de clientes:");
        
         int opcion = scanner.nextInt();
         for (int i = 0; i < opcion; i++) {

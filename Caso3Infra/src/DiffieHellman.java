@@ -37,6 +37,7 @@ public class DiffieHellman {
                 BigInteger Gx = gDecimal.modPow(x, pDecimal);
                 PG.add(pDecimal);
                 PG.add(gDecimal);
+                PG.add(x);
                 PG.add(Gx);
             }
 

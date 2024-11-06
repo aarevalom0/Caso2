@@ -4,12 +4,14 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.net.Socket;
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.Base64;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.DHGenParameterSpec;
 import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public class ProtocoloServidor {
     private Socket sockCliente;
@@ -41,10 +43,13 @@ public class ProtocoloServidor {
             inputLine = pIn.readLine();
             // Continua la conversacion envia G P Gx F(K_w-,(G,P,Gx))
             if (inputLine.equals("OK")) {
+                // tiempo 1
                 ArrayList<BigInteger> PG = DiffieHellman.GenerateGP();
                 BigInteger P = PG.get(0);
                 BigInteger G = PG.get(1);
-                BigInteger Gx = PG.get(2);
+                BigInteger X = PG.get(2);
+                BigInteger Gx = PG.get(3);
+                // tiempo 2
                 pOut.println(P.toString(16));
                 pOut.println(G.toString(16));
                 pOut.println(Gx.toString(16));
@@ -55,6 +60,11 @@ public class ProtocoloServidor {
                     BigInteger Gy = new BigInteger(pIn.readLine(), 16);
                     byte[] iv = Seguridad.GenerarIV();
                     pOut.println(Base64.getEncoder().encodeToString(iv));
+                    BigInteger Secreto = Gy.modPow(X, P);
+                    ArrayList<Key> llaves = Seguridad.LlavesSimetricas(Secreto);
+                    Key K_AB1 = llaves.get(0);
+                    Key K_AB2 = llaves.get(1);
+                    
                 } else {
                     pOut.println("ERROR");
                 }
