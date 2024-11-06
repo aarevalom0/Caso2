@@ -50,6 +50,7 @@ public class Servidor {
     public static void servidorDelegados(Integer N_THREADS){
     
         final ExecutorService pool = Executors.newFixedThreadPool(N_THREADS);
+        Integer idThread=1;
         ServerSocket servSock = null;
         try {
             servSock = new ServerSocket(PUERTO);
@@ -58,7 +59,8 @@ public class Servidor {
             
             while(true) {
                 Socket cliente = servSock.accept();
-                pool.execute( new ThreadServidor(cliente,0));
+                pool.execute( new ThreadServidor(cliente,idThread));
+                idThread++;
             }
         } catch(Exception e) {
             System.err.println("Ocurrio un error");
