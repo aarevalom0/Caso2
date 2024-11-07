@@ -13,7 +13,7 @@ public class DiffieHellman {
         public static ArrayList<BigInteger> GenerateGP(){
             try {
             PG = new ArrayList<BigInteger>();
-            String opensslPath = "Caso2\\Caso3Infra\\src\\OpenSSL-1.1.1h_win32\\openssl.exe";
+            String opensslPath = "Caso3Infra\\src\\OpenSSL-1.1.1h_win32\\openssl.exe";
             ProcessBuilder processBuilder = new ProcessBuilder(opensslPath, "dhparam", "-text", "1024");
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();

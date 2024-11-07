@@ -187,6 +187,38 @@ public class Seguridad {
                 return null;
             }
         }
+
+
+        public static byte[] cifrarAsimetrico(Key llave, String texto) {
+            byte[] textoCifrado;
+            
+            try {
+                Cipher cifrador = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                byte[] textoClaro = texto.getBytes();
+                
+                cifrador.init(Cipher.ENCRYPT_MODE, llave);
+                textoCifrado = cifrador.doFinal(textoClaro);
+                
+                return textoCifrado;
+            } catch (Exception e) {
+                System.out.println("Exception: " + e.getMessage());
+                return null;
+            }
+        }
+
+        public static byte[] descifrarAsimetrico(Key llave,  byte[] texto) {
+            byte[] textoClaro;
+            
+            try {
+                Cipher cifrador = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                cifrador.init(Cipher.DECRYPT_MODE, llave);
+                textoClaro = cifrador.doFinal(texto);
+            } catch (Exception e) {
+                System.out.println("Exception: " + e.getMessage());
+                return null;
+            }
+            return textoClaro;
+        }
     
 
 }

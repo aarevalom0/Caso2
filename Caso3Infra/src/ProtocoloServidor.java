@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.net.Socket;
 import java.security.Key;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Base64;
 
@@ -28,28 +29,40 @@ public class ProtocoloServidor {
     }
 
     public static void procesar(BufferedReader pIn, PrintWriter pOut) throws Exception {
-        //Inicia conversacion
+       
         String inputLine, outputLine;
-        // Valida SECINIT y descifra el reto
+        
         inputLine = pIn.readLine();
         if (inputLine.equals("SECINIT")) {
             // tiempo inicial
+            long tiempoInicioReto = System.nanoTime();
+
             String reto = pIn.readLine();
             byte[] retoCifrado = Base64.getDecoder().decode(reto);
             byte[] retoDescifrado = Seguridad.descifrar(Seguridad.LlavePrivadaServidor(), retoCifrado);
-            // tiempo final sumar a variable estatica tiempo
+            
+            long tiempoFinReto = System.nanoTime();
+            long tiempoTotalReto = tiempoFinReto - tiempoInicioReto;
+            System.out.println("Tiempo para responder el reto: " + tiempoTotalReto + " nanosegundos");
+
             String retoDescifradoStr = new String(retoDescifrado);
             pOut.println(retoDescifradoStr);
             inputLine = pIn.readLine();
-            // Continua la conversacion envia G P Gx F(K_w-,(G,P,Gx))
+            
             if (inputLine.equals("OK")) {
-                // tiempo 1
+                
+                long tiempoInicioGeneracion = System.nanoTime();
+
                 ArrayList<BigInteger> PG = DiffieHellman.GenerateGP();
                 BigInteger P = PG.get(0);
                 BigInteger G = PG.get(1);
                 BigInteger X = PG.get(2);
                 BigInteger Gx = PG.get(3);
-                // tiempo 2
+                
+                long tiempoFinGeneracion = System.nanoTime();
+                long tiempoTotalGeneracion = tiempoFinGeneracion - tiempoInicioGeneracion;
+                System.out.println("Tiempo para generar G, P y Gx: " + tiempoTotalGeneracion + " nanosegundos");
+
                 pOut.println(P.toString(16));
                 pOut.println(G.toString(16));
                 pOut.println(Gx.toString(16));
@@ -75,23 +88,50 @@ public class ProtocoloServidor {
                     String Idp = new String(Seguridad.descifrarSimetrico(K_AB1, IDPaqC,iv));
                     byte[] HmacPaq = Seguridad.HMAC(K_AB2, IDPaqC);
 
+                    
+                    long tiempoInicioVerificacion = System.nanoTime();
+
                     if (Base64.getEncoder().encodeToString(HmacRecibido).equals(Base64.getEncoder().encodeToString(Hmac))) {
                         if (Base64.getEncoder().encodeToString(HMACPaq).equals(Base64.getEncoder().encodeToString(HmacPaq))) {
 
                             Integer estado = Datos.ConsultarUsuario(Integer.parseInt(Id), Integer.parseInt(Idp));
+
+                            
+                            long tiempoInicioCifradoEstado = System.nanoTime();
+
                             String Estadocifrado = Base64.getEncoder().encodeToString(Seguridad.cifrarSimetrico(K_AB1, estado.toString(), iv));
+
+                            
+                            long tiempoFinCifradoEstado = System.nanoTime();
+                            long tiempoTotalCifradoEstado = tiempoFinCifradoEstado - tiempoInicioCifradoEstado;
+                            System.out.println("Tiempo para cifrar el estado del paquete: " + tiempoTotalCifradoEstado + " nanosegundos");
+
                             pOut.println(Estadocifrado);
+
+                            
+                            long tiempoInicioCifradoAsimetrico = System.nanoTime();
+                             
+                            String EstadocifradoAsimetrico = Base64.getEncoder().encodeToString(Seguridad.cifrarAsimetrico(K_AB1, estado.toString()));
+                            long tiempoFinCifradoAsimetrico = System.nanoTime();
+                            long tiempoTotalCifradoAsimetrico = tiempoFinCifradoAsimetrico - tiempoInicioCifradoAsimetrico;
+                            System.out.println("Tiempo para cifrar el estado del paquete con cifrado asimétrico: " + tiempoTotalCifradoAsimetrico + " nanosegundos");
+
                             byte[] HMACEstado = Seguridad.HMAC(K_AB2, Base64.getDecoder().decode(Estadocifrado));
                             pOut.println(Base64.getEncoder().encodeToString(HMACEstado));
 
                         }  else {
-                    pOut.println("ERROR");
-                    System.out.println("Error en la consulta");
+                        pOut.println("ERROR");
+                        System.out.println("Error en la consulta");
                 }                       
                     } else {
                         pOut.println("ERROR");
                         System.out.println("Error en la consulta");
                     } 
+                    
+                    long tiempoFinVerificacion = System.nanoTime();
+                    long tiempoTotalVerificacion = tiempoFinVerificacion - tiempoInicioVerificacion;
+                    System.out.println("Tiempo para verificar la consulta: " + tiempoTotalVerificacion + " nanosegundos");
+                    
                 } else {
                     pOut.println("ERROR");
                     System.out.println("Error en la consulta");
